@@ -33,7 +33,7 @@ class LogWritter {
     // Adição de linha personalizada para o arquivo caso necessário
     public void appendln(String conteudo) {
         try {
-            pw.println(conteudo);
+            pw.println(conteudo + "\t");
         } catch (Exception e) {
             System.err.println("Erro ao escrever no arquivo: " + e.getMessage());
         }
@@ -371,7 +371,6 @@ class ColecaoRestaurante {
             return null;
         }
         for (int i = 0; i < tamanho; i++) {
-            Globals.comparacoes++;
             if (this.restaurantes[i].id == id) {
                 return this.restaurantes[i];
             }
@@ -391,7 +390,6 @@ class ColecaoRestaurante {
             int media = (esq + dir) / 2;
             // System.out.println(String.format("Esq: %d; Dir: %d; Media: %d;", esq, dir,
             // media));
-            Globals.comparacoes++;
             if (this.restaurantes[media].id == id) {
                 return this.restaurantes[media];
             } else if (this.restaurantes[media].id > id) {
@@ -409,15 +407,19 @@ class ColecaoRestaurante {
         for (int i = 1; i < this.getTamanho(); i++) {
             Restaurante tmp = this.restaurantes[i];
             int j = i - 1;
-
+            
             while ((j >= 0) && (this.restaurantes[j].cidade.compareTo(tmp.cidade) > 0)) {
                 Globals.comparacoes++;
                 this.restaurantes[j + 1] = this.restaurantes[j];
+                Globals.movimentacoes++;
                 j--;
             }
+            if(j < 0) Globals.comparacoes++;
+            
             this.restaurantes[j + 1] = tmp;
+            Globals.movimentacoes++;
         }
-
+        
         return this;
     }
 
@@ -474,6 +476,12 @@ class ColecaoRestaurante {
         return this.restaurantes[i];
     }
 
+    public void printAll() {
+        for (int i = 0; i < this.getTamanho(); i++) {
+            System.out.println(this.getRestauranteByIndex(i).formatar());
+        }
+    }
+
 }
 
 public class Tp02 {
@@ -483,9 +491,9 @@ public class Tp02 {
 
     public static void main(String args[]) {
         String tmpDir = System.getProperty("java.io.tmpdir"); // caminho para a pasta tmp (Ao invés de usar só "/tmp")
-        LogWritter lw = new LogWritter("buscasequencial"); // Criação do arquivo de log
+        LogWritter lw = new LogWritter("insercao"); // Criação do arquivo de log
         lw.clear(); // Limpeza de log existente para facilitar debug local
-        long init_tempo = System.nanoTime(), end_tempo = System.nanoTime(); // Inicialização dos tempos
+        long init_tempo, end_tempo; // Inicialização dos tempos
 
         File file = new File(tmpDir + "/restaurantes.csv");
         ColecaoRestaurante restaurantes = ColecaoRestaurante.lerCsv(file);
@@ -494,31 +502,26 @@ public class Tp02 {
         Scanner scan = new Scanner(System.in);
         int n = scan.nextInt();
 
+        
         while (n != -1) {
             Restaurante resultado = restaurantes.getRestauranteByIdBinario(n);
             if (resultado != null) {
                 restaurantesCopy.push(resultado);
             }
-
+            
             n = scan.nextInt();
         }
+        
+        init_tempo = System.nanoTime();
+        
+        restaurantesCopy.insertionSortByCidade();
+        
+        end_tempo = System.nanoTime();
 
-        String str = scan.nextLine();
-        scan.nextLine();
-
-        while (!isFim(str)) {
-            Restaurante resultado = restaurantesCopy.getRestauranteByNomeSequencial(str);
-            if (resultado == null) {
-                System.out.println("NAO");
-            } else System.out.println("SIM");
-
-
-            str = scan.nextLine();
-        }
+        restaurantesCopy.printAll();
 
         scan.close();
 
-        end_tempo = System.nanoTime();
 
         long duracao = (end_tempo - init_tempo) / 1000000; // Nanosegundos para milissegundos (usei nanosegundos
                                                            // para maior precisão)

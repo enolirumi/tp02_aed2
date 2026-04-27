@@ -1,0 +1,3 @@
+Tempo de execução: 100ns (Ou 0,000ms)	
+Quantidade de comparações: 0 comparações	
+Quantidade de movimentações: 0 movimentações	

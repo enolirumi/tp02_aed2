@@ -1,0 +1,3 @@
+Tempo de execução: 550900ns (Ou 0,551ms)	
+Quantidade de comparações: 295 comparações	
+Quantidade de movimentações: 572 movimentações	

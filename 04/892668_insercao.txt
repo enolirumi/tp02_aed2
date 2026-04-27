@@ -1,0 +1,3 @@
+Tempo de execução: 0ms (Ou 0,000s)	
+Quantidade de comparações: 596 comparações	
+Quantidade de movimentações: 644 movimentações	

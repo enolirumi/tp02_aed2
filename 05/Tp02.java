@@ -506,6 +506,10 @@ public class Tp02 {
         String str = scan.nextLine();
         scan.nextLine();
 
+        // for (int i = 0; i < restaurantesCopy.getTamanho(); i++) { // Debug
+        //     System.out.println("Elemento " + restaurantesCopy.getRestauranteByIndex(i).id + ": " + restaurantesCopy.getRestauranteByIndex(i).nome);
+        // }
+
         while (!isFim(str)) {
             Restaurante resultado = restaurantesCopy.getRestauranteByNomeSequencial(str);
             if (resultado == null) {
@@ -517,6 +521,10 @@ public class Tp02 {
         }
 
         scan.close();
+        // try {
+        // } catch (Exception e) {
+        //     System.out.println(e);
+        // }
 
         end_tempo = System.nanoTime();
 

@@ -33,7 +33,7 @@ class LogWritter {
     // Adição de linha personalizada para o arquivo caso necessário
     public void appendln(String conteudo) {
         try {
-            pw.println(conteudo);
+            pw.println(conteudo + "\t");
         } catch (Exception e) {
             System.err.println("Erro ao escrever no arquivo: " + e.getMessage());
         }
@@ -56,7 +56,7 @@ class LogWritter {
 
     // Appends padrões
     public void setTempo(long duracao) {
-        this.appendln("Tempo de execução: " + duracao + "ms (Ou " + String.format("%.3f", duracao / 1000.0) + "s)");
+        this.appendln("Tempo de execução: " + duracao + "ns (Ou " + String.format("%.3f", duracao / 1000000.0) + "ms)");
     }
 
     public void setMovimentacoes(int movimentacoes) {
@@ -371,7 +371,6 @@ class ColecaoRestaurante {
             return null;
         }
         for (int i = 0; i < tamanho; i++) {
-            Globals.comparacoes++;
             if (this.restaurantes[i].id == id) {
                 return this.restaurantes[i];
             }
@@ -391,7 +390,6 @@ class ColecaoRestaurante {
             int media = (esq + dir) / 2;
             // System.out.println(String.format("Esq: %d; Dir: %d; Media: %d;", esq, dir,
             // media));
-            Globals.comparacoes++;
             if (this.restaurantes[media].id == id) {
                 return this.restaurantes[media];
             } else if (this.restaurantes[media].id > id) {
@@ -413,9 +411,14 @@ class ColecaoRestaurante {
             while ((j >= 0) && (this.restaurantes[j].cidade.compareTo(tmp.cidade) > 0)) {
                 Globals.comparacoes++;
                 this.restaurantes[j + 1] = this.restaurantes[j];
+                Globals.movimentacoes++;
                 j--;
             }
+            if (j < 0)
+                Globals.comparacoes++;
+
             this.restaurantes[j + 1] = tmp;
+            Globals.movimentacoes++;
         }
 
         return this;
@@ -443,35 +446,138 @@ class ColecaoRestaurante {
         Restaurante[] a1 = new Restaurante[n1];
         Restaurante[] a2 = new Restaurante[n2];
 
-        for (int i = 0; i < n1; i++)
+        for (int i = 0; i < n1; i++) {
             a1[i] = this.restaurantes[esq + i];
-        for (int j = 0; j < n2; j++)
+            Globals.movimentacoes++;
+        }
+        for (int j = 0; j < n2; j++) {
             a2[j] = this.restaurantes[meio + j + 1];
+            Globals.movimentacoes++;
+        }
 
         int i = 0, j = 0, k = esq;
 
         while (i < n1 && j < n2) {
-            if (a1[i].nome.compareTo(a2[j].nome) <= 0) {
+            Globals.comparacoes++;
+            if (a1[i].cidade.compareTo(a2[j].cidade) < 0) {
                 this.restaurantes[k] = a1[i];
                 i++;
-            } else {
+            } else if (a1[i].cidade.compareTo(a2[j].cidade) > 0) {
                 this.restaurantes[k] = a2[j];
                 j++;
+            } else { // Caso sejam a mesma cidade entra para comparar por nome
+                Globals.comparacoes++;
+                if (a1[i].nome.compareTo(a2[j].nome) <= 0) {
+                    this.restaurantes[k] = a1[i];
+                    i++;
+                } else {
+                    this.restaurantes[k] = a2[j];
+                    j++;
+                }
             }
+            Globals.movimentacoes++;
             k++;
         }
 
         while (i < n1) {
             this.restaurantes[k++] = a1[i++];
+            Globals.movimentacoes++;
         }
 
         while (j < n2) {
             this.restaurantes[k++] = a2[j++];
+            Globals.movimentacoes++;
         }
     }
 
+    public void heapSortByDataAbertura() {
+    int n = this.getTamanho();
+
+    // O Heapsort utiliza o array de restaurantes da classe
+    // Construção do heap (ajustando para heap de máximo)
+    for (int tamHeap = 2; tamHeap <= n; tamHeap++) {
+        construir(tamHeap);
+    }
+
+    // Ordenação propriamente dita
+    int tamHeap = n;
+    while (tamHeap > 1) {
+        swap(1, tamHeap--);
+        reconstruir(tamHeap);
+    }
+}
+
+private void construir(int tamHeap) {
+    for (int i = tamHeap; i > 1 && comparar(i, i / 2) > 0; i /= 2) {
+        swap(i, i / 2);
+    }
+}
+
+private void reconstruir(int tamHeap) {
+    int i = 1;
+    while (i <= (tamHeap / 2)) {
+        int filho = getMaiorFilho(i, tamHeap);
+        if (comparar(i, filho) < 0) {
+            swap(i, filho);
+            i = filho;
+        } else {
+            i = tamHeap; // Força a saída do loop
+        }
+    }
+}
+
+private int getMaiorFilho(int i, int tamHeap) {
+    int filho;
+    if (2 * i == tamHeap) {
+        filho = 2 * i;
+    } else {
+        // Comparação entre os dois filhos para ver qual é o maior
+        if (comparar(2 * i, 2 * i + 1) > 0) {
+            filho = 2 * i;
+        } else {
+            filho = 2 * i + 1;
+        }
+    }
+    return filho;
+}
+
+/**
+ * Método auxiliar para centralizar a lógica de comparação (Data + Nome)
+ * Retorna > 0 se restaurantes[i] > restaurantes[j]
+ */
+private int comparar(int i, int j) {
+    Globals.comparacoes++;
+    // Atenção: como seu swap usa indexação 1 no array de restaurantes, 
+    // certifique-se que o array suporta a posição N.
+    Restaurante r1 = this.restaurantes[i];
+    Restaurante r2 = this.restaurantes[j];
+
+    int compData = r1.dataAbertura.compareTo(r2.dataAbertura);
+
+    if (compData != 0) {
+        return compData;
+    }
+
+    // Empate na data: desempate pelo nome
+    Globals.comparacoes++;
+    return r1.nome.compareTo(r2.nome);
+}
+
+private void swap(int i, int j) {
+    Restaurante aux = this.restaurantes[i];
+    this.restaurantes[i] = this.restaurantes[j];
+    this.restaurantes[j] = aux;
+    Globals.movimentacoes += 3;
+}
+
     public Restaurante getRestauranteByIndex(int i) {
         return this.restaurantes[i];
+    }
+
+    public void printAll() {
+        for (int i = 0; i < this.getTamanho(); i++) {
+            System.out.println(this.getRestauranteByIndex(i).formatar());
+        }
     }
 
 }
@@ -483,9 +589,9 @@ public class Tp02 {
 
     public static void main(String args[]) {
         String tmpDir = System.getProperty("java.io.tmpdir"); // caminho para a pasta tmp (Ao invés de usar só "/tmp")
-        LogWritter lw = new LogWritter("buscasequencial"); // Criação do arquivo de log
+        LogWritter lw = new LogWritter("mergesort"); // Criação do arquivo de log
         lw.clear(); // Limpeza de log existente para facilitar debug local
-        long init_tempo = System.nanoTime(), end_tempo = System.nanoTime(); // Inicialização dos tempos
+        long init_tempo, end_tempo; // Inicialização dos tempos
 
         File file = new File(tmpDir + "/restaurantes.csv");
         ColecaoRestaurante restaurantes = ColecaoRestaurante.lerCsv(file);
@@ -503,25 +609,17 @@ public class Tp02 {
             n = scan.nextInt();
         }
 
-        String str = scan.nextLine();
-        scan.nextLine();
+        init_tempo = System.nanoTime();
 
-        while (!isFim(str)) {
-            Restaurante resultado = restaurantesCopy.getRestauranteByNomeSequencial(str);
-            if (resultado == null) {
-                System.out.println("NAO");
-            } else System.out.println("SIM");
-
-
-            str = scan.nextLine();
-        }
-
-        scan.close();
+        restaurantesCopy.mergeSortByNome();
 
         end_tempo = System.nanoTime();
 
-        long duracao = (end_tempo - init_tempo) / 1000000; // Nanosegundos para milissegundos (usei nanosegundos
-                                                           // para maior precisão)
+        restaurantesCopy.printAll();
+
+        scan.close();
+
+        long duracao = (end_tempo - init_tempo);
         lw.setTempo(duracao);
         lw.setComparacoes(Globals.comparacoes);
         lw.setMovimentacoes(Globals.movimentacoes);

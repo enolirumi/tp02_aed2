@@ -1,72 +1,5 @@
-import java.io.*;
+import java.io.File;
 import java.util.*;
-
-class Globals {
-    public static int comparacoes = 0;
-    public static int movimentacoes = 0;
-}
-
-// Só para facilitar a criação do arquivo de log (Espero que não tenha problema)
-class LogWritter {
-    private String matricula = "892668";
-    private String name;
-    private FileWriter fw;
-    private PrintWriter pw;
-
-    // Passagem do nome do exercício
-    public LogWritter(String name) {
-        this.name = name;
-        this.newLog(true);
-    }
-
-    // Instanciação dos Writers
-    private LogWritter newLog(boolean append) {
-        try {
-            this.pw = new PrintWriter(new FileWriter("./" + this.matricula + "_" + name + ".txt", append));
-        } catch (IOException e) {
-            System.err.println("Erro ao gerenciar arquivo de log: " + e.getMessage());
-        }
-
-        return this;
-    }
-
-    // Adição de linha personalizada para o arquivo caso necessário
-    public void appendln(String conteudo) {
-        try {
-            pw.println(conteudo);
-        } catch (Exception e) {
-            System.err.println("Erro ao escrever no arquivo: " + e.getMessage());
-        }
-    }
-
-    // Zera arquivo
-    public void clear() {
-        close();
-        newLog(false);
-        close();
-        newLog(true);
-    }
-
-    // Fecha os Writers
-    public void close() {
-        if (pw != null) {
-            pw.close();
-        }
-    }
-
-    // Appends padrões
-    public void setTempo(long duracao) {
-        this.appendln("Tempo de execução: " + duracao + "ms (Ou " + String.format("%.3f", duracao / 1000.0) + "s)");
-    }
-
-    public void setMovimentacoes(int movimentacoes) {
-        this.appendln("Quantidade de movimentações: " + movimentacoes + " movimentações");
-    }
-
-    public void setComparacoes(int comparacoes) {
-        this.appendln("Quantidade de comparações: " + comparacoes + " comparações");
-    }
-}
 
 class Hora {
     private int hora, minuto;
@@ -97,7 +30,9 @@ class Hora {
         return String.format("%02d:%02d", this.hora, this.minuto);
     }
 
-    // ------ GETTERS -------
+
+    // ------  GETTERS  -------
+
 
     public String getHora() {
         return String.format("%02d", this.hora);
@@ -146,6 +81,7 @@ class Data {
         return String.format("%02d/%02d/%04d", this.dia, this.mes, this.ano);
     }
 
+
 }
 
 class Restaurante {
@@ -165,10 +101,9 @@ class Restaurante {
     public Restaurante(String csvString) {
         int qtdCampos = 1;
 
-        // Conta quantos campos tem
+        //Conta quantos campos tem
         for (int i = 0; i < csvString.length(); i++) {
-            if (csvString.charAt(i) == ',')
-                qtdCampos++;
+            if(csvString.charAt(i) == ',') qtdCampos++;
         }
 
         String[] campos = new String[qtdCampos];
@@ -190,15 +125,14 @@ class Restaurante {
         // Repete mesma ideia para separar os tipos de cozinha
         int qtdCozinhas = 1;
         for (int i = 0; i < campos[5].length(); i++) {
-            if (campos[5].charAt(i) == ';')
-                qtdCozinhas++;
+            if(campos[5].charAt(i) == ';') qtdCozinhas++;
         }
-
+        
         String[] cozinhas = new String[qtdCozinhas];
         campoAtual = 0;
         buffer = "";
 
-        for (int i = 0; i < campos[5].length(); i++) {
+        for(int i = 0; i < campos[5].length(); i++) {
             char cAtual = campos[5].charAt(i);
             if (cAtual == ';') {
                 buffer = "";
@@ -214,7 +148,7 @@ class Restaurante {
         campoAtual = 0;
         buffer = "";
 
-        for (int i = 0; i < campos[7].length(); i++) {
+        for(int i = 0; i < campos[7].length(); i++) {
             char cAtual = campos[7].charAt(i);
             if (cAtual == '-') {
                 buffer = "";
@@ -237,68 +171,55 @@ class Restaurante {
         this.dataAbertura = Data.parseData(campos[8]);
         this.aberto = Boolean.parseBoolean(campos[9]);
     }
-
-    // ------ GETTERS -------
-
+    
+    // ------  GETTERS  -------
+    
     public int getId() {
         return this.id;
     }
-
     public String getNome() {
         return this.nome;
     }
-
     public String getCidade() {
         return this.cidade;
     }
-
     public int getCapacidade() {
         return this.capacidade;
     }
-
     public double getAvaliacao() {
         return this.avaliacao;
     }
-
     public String[] getTiposCozinha() {
         return this.tiposCozinha;
     }
-
     public int getFaixaPreco() {
         return this.faixaPreco;
     }
-
     public Hora getHorarioAbertura() {
         return this.horarioAbertura;
     }
-
     public Hora getHorarioFechamento() {
         return this.horarioFechamento;
     }
-
     public Data getDataAbertura() {
         return this.dataAbertura;
     }
-
     public boolean isAberto() {
         return this.aberto;
     }
 
     // Retorno de string padronizado
     public String formatar() {
-        String s = String.format("[%d ## %s ## %s ## %d ## %.1f ## [", this.id, this.nome, this.cidade, this.capacidade,
-                this.avaliacao);
-        for (int i = 0; i < this.tiposCozinha.length; i++) {
+        String s = String.format("[%d ## %s ## %s ## %d ## %.1f ## [", this.id, this.nome, this.cidade, this.capacidade, this.avaliacao);
+        for(int i = 0; i < this.tiposCozinha.length; i++) {
             s += this.tiposCozinha[i];
             if (i != this.tiposCozinha.length - 1) {
                 s += ",";
             }
         }
         s += "] ## ";
-        for (int i = 0; i < this.faixaPreco; i++)
-            s += "$";
-        s += String.format(" ## %s-%s ## %s ## %b]", this.horarioAbertura.format(), this.horarioFechamento.format(),
-                this.dataAbertura.format(), this.aberto);
+        for (int i = 0; i < this.faixaPreco; i++) s += "$";
+        s += String.format(" ## %s-%s ## %s ## %b]", this.horarioAbertura.format(), this.horarioFechamento.format(), this.dataAbertura.format(), this.aberto);
         return s;
     }
 
@@ -312,7 +233,7 @@ class ColecaoRestaurante {
         this.tamanho = 0;
         this.restaurantes = new Restaurante[1000];
     }
-
+    
     public ColecaoRestaurante(Restaurante restaurante) {
         this.tamanho = 1;
         this.restaurantes = new Restaurante[1000];
@@ -322,7 +243,7 @@ class ColecaoRestaurante {
     // Leitura de Arquivo CSV
     public static ColecaoRestaurante lerCsv(File file) {
         ColecaoRestaurante restaurantes = new ColecaoRestaurante();
-        try (Scanner scan = new Scanner(file);) {
+        try(Scanner scan = new Scanner(file);) {
             scan.nextLine();
             while (scan.hasNextLine()) {
                 String linha = scan.nextLine();
@@ -342,26 +263,10 @@ class ColecaoRestaurante {
         this.tamanho++;
     }
 
-    // ------ GETTERS -------
+    // ------  GETTERS  -------
 
     public int getTamanho() {
         return this.tamanho;
-    }
-
-    public Restaurante[] getRestaurantes() {
-        return this.restaurantes;
-    }
-
-    // Busca sequencial por nome (Questão 05)
-    public Restaurante getRestauranteByNomeSequencial(String nome) {
-        for (int i = 0; i < this.getTamanho(); i++) {
-            Globals.comparacoes++;
-            if (this.restaurantes[i].nome.compareTo(nome) == 0) {
-                return this.restaurantes[i];
-            }
-        }
-        // System.out.println("O ID não corresponde a nenhum restaurante");
-        return null;
     }
 
     // Busca sequencial por ID. Linear mas não necessita de ordenação prévia
@@ -371,8 +276,7 @@ class ColecaoRestaurante {
             return null;
         }
         for (int i = 0; i < tamanho; i++) {
-            Globals.comparacoes++;
-            if (this.restaurantes[i].id == id) {
+            if(this.restaurantes[i].id == id) {
                 return this.restaurantes[i];
             }
         }
@@ -387,16 +291,14 @@ class ColecaoRestaurante {
             System.out.println("O ID é inválido");
             return null;
         }
-        while (esq <= dir) {
+        while(esq <= dir) { 
             int media = (esq + dir) / 2;
-            // System.out.println(String.format("Esq: %d; Dir: %d; Media: %d;", esq, dir,
-            // media));
-            Globals.comparacoes++;
+            // System.out.println(String.format("Esq: %d; Dir: %d; Media: %d;", esq, dir, media));
             if (this.restaurantes[media].id == id) {
                 return this.restaurantes[media];
-            } else if (this.restaurantes[media].id > id) {
+            } else if(this.restaurantes[media].id > id) {
                 dir = media - 1;
-            } else if (this.restaurantes[media].id < id) {
+            } else if(this.restaurantes[media].id < id) {
                 esq = media + 1;
             }
         }
@@ -404,72 +306,22 @@ class ColecaoRestaurante {
         return null;
     }
 
-    // Insertion Sort por cidade (Questão 04)
     public ColecaoRestaurante insertionSortByCidade() {
-        for (int i = 1; i < this.getTamanho(); i++) {
-            Restaurante tmp = this.restaurantes[i];
+        for (int i = 1; i < this.restaurantes.length; i++) {
+            String key = this.restaurantes[i].cidade;
             int j = i - 1;
 
-            while ((j >= 0) && (this.restaurantes[j].cidade.compareTo(tmp.cidade) > 0)) {
-                Globals.comparacoes++;
+            while (j >= 0 && this.restaurantes[j].cidade.compareTo(key) == 1) {
                 this.restaurantes[j + 1] = this.restaurantes[j];
                 j--;
             }
-            this.restaurantes[j + 1] = tmp;
+            
+            this.restaurantes[j + 1].cidade = key;
         }
 
         return this;
     }
-
-    // Merge Sort por Nome (Questão 07)
-    public void mergeSortByNome() {
-        this.mergeSort(0, this.getTamanho() - 1);
-    }
-
-    private void mergeSort(int esq, int dir) {
-        if (esq < dir) {
-            int meio = (esq + dir) / 2;
-            mergeSort(esq, meio);
-            mergeSort(meio + 1, dir);
-            intercalar(esq, meio, dir);
-        }
-    }
-
-    private void intercalar(int esq, int meio, int dir) {
-        int n1 = meio - esq + 1;
-        int n2 = dir - meio;
-
-        // Subarrays temporários para armazenar as referências dos objetos Restaurante
-        Restaurante[] a1 = new Restaurante[n1];
-        Restaurante[] a2 = new Restaurante[n2];
-
-        for (int i = 0; i < n1; i++)
-            a1[i] = this.restaurantes[esq + i];
-        for (int j = 0; j < n2; j++)
-            a2[j] = this.restaurantes[meio + j + 1];
-
-        int i = 0, j = 0, k = esq;
-
-        while (i < n1 && j < n2) {
-            if (a1[i].nome.compareTo(a2[j].nome) <= 0) {
-                this.restaurantes[k] = a1[i];
-                i++;
-            } else {
-                this.restaurantes[k] = a2[j];
-                j++;
-            }
-            k++;
-        }
-
-        while (i < n1) {
-            this.restaurantes[k++] = a1[i++];
-        }
-
-        while (j < n2) {
-            this.restaurantes[k++] = a2[j++];
-        }
-    }
-
+    
     public Restaurante getRestauranteByIndex(int i) {
         return this.restaurantes[i];
     }
@@ -477,56 +329,28 @@ class ColecaoRestaurante {
 }
 
 public class Tp02 {
-    public static boolean isFim(String str) {
-        return (str.length() == 3 && str.charAt(0) == 'F' && str.charAt(1) == 'I' && str.charAt(2) == 'M');
-    }
+    public static void main(String args[]){
 
-    public static void main(String args[]) {
-        String tmpDir = System.getProperty("java.io.tmpdir"); // caminho para a pasta tmp (Ao invés de usar só "/tmp")
-        LogWritter lw = new LogWritter("buscasequencial"); // Criação do arquivo de log
-        lw.clear(); // Limpeza de log existente para facilitar debug local
-        long init_tempo = System.nanoTime(), end_tempo = System.nanoTime(); // Inicialização dos tempos
-
-        File file = new File(tmpDir + "/restaurantes.csv");
-        ColecaoRestaurante restaurantes = ColecaoRestaurante.lerCsv(file);
-        ColecaoRestaurante restaurantesCopy = new ColecaoRestaurante();
-
-        Scanner scan = new Scanner(System.in);
-        int n = scan.nextInt();
-
-        while (n != -1) {
-            Restaurante resultado = restaurantes.getRestauranteByIdBinario(n);
-            if (resultado != null) {
-                restaurantesCopy.push(resultado);
-            }
-
+        try {
+            String tmpDir = System.getProperty("java.io.tmpdir");
+            File file = new File(tmpDir + "/restaurantes.csv");
+            ColecaoRestaurante restaurantes = ColecaoRestaurante.lerCsv(file);
+        
+            Scanner scan = new Scanner(System.in);
+            int n;
             n = scan.nextInt();
+            
+            while (n != -1) {
+                Restaurante resultado = restaurantes.getRestauranteByIdBinario(n);
+                if (resultado != null) {
+                    System.out.println(resultado.formatar());
+                }
+                
+                n = scan.nextInt();
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
-
-        String str = scan.nextLine();
-        scan.nextLine();
-
-        while (!isFim(str)) {
-            Restaurante resultado = restaurantesCopy.getRestauranteByNomeSequencial(str);
-            if (resultado == null) {
-                System.out.println("NAO");
-            } else System.out.println("SIM");
-
-
-            str = scan.nextLine();
-        }
-
-        scan.close();
-
-        end_tempo = System.nanoTime();
-
-        long duracao = (end_tempo - init_tempo) / 1000000; // Nanosegundos para milissegundos (usei nanosegundos
-                                                           // para maior precisão)
-        lw.setTempo(duracao);
-        lw.setComparacoes(Globals.comparacoes);
-        lw.setMovimentacoes(Globals.movimentacoes);
-
-        lw.close();
     }
 
 }
